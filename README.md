@@ -12,19 +12,13 @@ A clean, modern iOS app displaying real-time spaceflight news from Spaceflight N
 
 ## ✨ Features
 
-<div align="center">
-
-| 🎯 Feature | ✅ Status |
-|------------|----------|
-| Live Spaceflight News (NASA, SpaceX) | ✅ Complete |
-| Offline Core Data Cache | ✅ Complete |
-| Loading/Empty/Error States | ✅ Complete |
-| MVVM + Clean Architecture | ✅ Complete |
-| Unit/UI Tests (60%+) | ✅ Complete |
-| Pull-to-Refresh | ✅ Complete |
-| Responsive iPhone + iPad | ✅ Complete |
-
-</div>
+| Feature | Implementation |
+|---------|----------------|
+| ** Live Spaceflight News** | NASA, SpaceX, SpaceNews articles via v4 API |
+| ** Offline Support** | Core Data cache fallback |
+| ** Error Handling** | Loading/Empty/Error states + retry |
+| ** MVVM Architecture** | ViewModel → Service → Data layer |
+| ** Testing** | 60%+ coverage (Unit tests) |
 
   Key Patterns:
 	•	Dependency Injection: Mockable services for tests.
@@ -51,10 +45,9 @@ A clean, modern iOS app displaying real-time spaceflight news from Spaceflight N
 └── Tests/
     ├── Unit/                  # ViewModel, Service tests
     └── UI/                    # XCUITest full flows
-
-
+	
   Tech Stack
-	•	SwiftUI: Declarative UI with  @StateObject, .task  .
+	•	SwiftUI: Declarative UI with  @StateObject, .task.
 	•	Async/Await: Modern networking + Core Data.
-	•	Core Data: Offline caching with  DataManagerProtocol .
+	•	Core Data: Offline caching with  DataManagerProtocol.
 	•	XCTest: Comprehensive unit.
