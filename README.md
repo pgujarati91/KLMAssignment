@@ -11,11 +11,11 @@ A clean, modern iOS app displaying real-time spaceflight news from Spaceflight N
 <img width="250" height="500" alt="Simulator Screenshot - iPad mini (A17 Pro) - 2026-01-07 at 18 22 46" src="https://github.com/user-attachments/assets/e6e01e43-77b0-481f-96fc-1e09e3196803" />
 
 ✨ Features
-	•	Live Spaceflight News: Articles from NASA, SpaceX, SpaceNews, etc.
-	•	Offline Support: Core Data cache fallback on network failure.
-	•	Error Handling: Loading, empty, and error states with retry.
-	•	MVVM + Clean Architecture: Services.
-	•	60% Test Coverage: Unit tests for ViewModels.
+	•	Live Spaceflight News: Articles from NASA, SpaceX, SpaceNews, etc. /n
+	•	Offline Support: Core Data cache fallback on network failure. /n
+	•	Error Handling: Loading, empty, and error states with retry. /n
+	•	MVVM + Clean Architecture: Services. /n
+	•	60% Test Coverage: Unit tests for ViewModels. /n
 
   Key Patterns:
 	•	Dependency Injection: Mockable services for tests.
