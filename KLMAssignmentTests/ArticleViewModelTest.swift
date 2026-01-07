@@ -1,75 +1,109 @@
-import Foundation
 import XCTest
 @testable import KLMAssignment
 
-@MainActor  // Required for @Published properties
+@MainActor
 final class ArticleViewModelTests: XCTestCase {
     
-    var viewModel: ArticleViewModel!
-    var mockService: MockArticleService!
+    private var articleViewModel: ArticleViewModel!
+    private var mockService: MockArticleService!
     
     override func setUp() {
         super.setUp()
         mockService = MockArticleService()
-        viewModel = ArticleViewModel(service: mockService)
+        articleViewModel = ArticleViewModel(service: mockService)
     }
     
     override func tearDown() {
-        viewModel = nil
+        articleViewModel = nil
         mockService = nil
         super.tearDown()
     }
     
-    // MARK: - Initial State
     func testInitialState() {
-        
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertNil(viewModel.error)
-        XCTAssertTrue(viewModel.article.isEmpty)
+        XCTAssertEqual(articleViewModel.loadingState, .idle)
+        XCTAssertTrue(articleViewModel.article.isEmpty)
+        XCTAssertNil(articleViewModel.error)
     }
     
-    // MARK: - Successful Fetch
-    func testGetAllArticles_Success_UpdatesArticles() async {
-        // Arrange
-        let expectedArticles: [Article] = [
-            Article(
-               id: 2,
-               title: "Local Article",
-               url: "https://local.com",
-               imageURL: nil,
-               newsSite: "Local Site",
-               summary: "Local Summary",
-           )
+    func testGetAllArticlesSuccessSetsLoadedState() async throws {
+        mockService = MockArticleService.successMock()
+        articleViewModel = ArticleViewModel(service: mockService)
+        
+        await articleViewModel.getAllArticles()
+        
+        try await Task.sleep(for: .milliseconds(100))
+        
+        XCTAssertEqual(articleViewModel.loadingState, .loaded(mockService.articlesToReturn))
+        XCTAssertFalse(articleViewModel.article.isEmpty)
+        XCTAssertNil(articleViewModel.error)
+    }
+
+    func testGetAllArticlesEmptySetsEmptyState() async throws {
+        mockService = MockArticleService.emptyMock()
+        articleViewModel = ArticleViewModel(service: mockService)
+        
+        await articleViewModel.getAllArticles()
+        
+        try await Task.sleep(for: .milliseconds(100))
+        
+        XCTAssertEqual(articleViewModel.loadingState, .empty)
+        XCTAssertTrue(articleViewModel.article.isEmpty)
+        XCTAssertNil(articleViewModel.error)
+    }
+    
+    func testGetAllArticlesErrorSetsErrorState() async throws {
+        mockService = MockArticleService.errorMock()
+        articleViewModel = ArticleViewModel(service: mockService)
+        
+        await articleViewModel.getAllArticles()
+        
+        try await Task.sleep(for: .milliseconds(100))
+        
+        XCTAssertEqual(articleViewModel.loadingState, .error(.noData))
+        XCTAssertNil(articleViewModel.error)
+        XCTAssertTrue(articleViewModel.article.isEmpty)
+    }
+    
+    func testLoadingStateDuringFetch() async throws {
+        let mock = MockArticleService.successMock()
+        let viewModel = ArticleViewModel(service: mock)
+        
+        XCTAssertEqual(viewModel.loadingState, .idle)
+        
+        let task = Task { await viewModel.getAllArticles() }
+        
+        try await Task.sleep(for: .milliseconds(50))
+        XCTAssertEqual(viewModel.loadingState, .loading)
+        
+        await task.value
+        XCTAssertEqual(viewModel.loadingState, .loaded(mock.articlesToReturn))
+    }
+    
+    func testDuplicateLogicSetsLoadedForNonEmpty() async throws {
+
+        mockService.articlesToReturn = [
+            Article(id: 1, title: "A", url: nil, imageURL: nil, newsSite: "Test", summary: ""),
+            Article(id: 2, title: "B", url: nil, imageURL: nil, newsSite: "Test", summary: "")
         ]
-        mockService.articlesToReturn = expectedArticles
+        articleViewModel = ArticleViewModel(service: mockService)
         
-        await viewModel.getAllArticles()
+        await articleViewModel.getAllArticles()
         
-        XCTAssertEqual(viewModel.article, expectedArticles)
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertNil(viewModel.error)
+        try await Task.sleep(for: .milliseconds(100))
+        
+        XCTAssertEqual(articleViewModel.loadingState, .loaded(mockService.articlesToReturn))
     }
-    
-    // MARK: - Error Handling
-    func testGetAllArticles_Error_SetsErrorAndClearsArticles() async {
+
+    func testSingleArticleSetsLoadedState() async throws {
         
-        let expectedError = NetworkError.invalidResponse
-        mockService.errorToThrow = expectedError
+        mockService.articlesToReturn = [Article(id: 1, title: "Single", url: nil, imageURL: nil, newsSite: "Test", summary: "")]
         
-        await viewModel.getAllArticles()
+        articleViewModel = ArticleViewModel(service: mockService)
         
-        XCTAssertEqual(viewModel.article, [])
-        XCTAssertFalse(viewModel.isLoading)
-        XCTAssertNotEqual(viewModel.error, expectedError)
-    }
-    
-    // MARK: - Loading State
-    func testGetAllArticles_SetsLoadingCorrectly() async {
+        await articleViewModel.getAllArticles()
         
-        mockService.articlesToReturn = []
-   
-        await viewModel.getAllArticles()
+        try await Task.sleep(for: .milliseconds(100))
         
-        XCTAssertFalse(viewModel.isLoading)
+        XCTAssertEqual(articleViewModel.loadingState, .loaded([mockService.articlesToReturn[0]]))
     }
 }

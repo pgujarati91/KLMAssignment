@@ -9,13 +9,14 @@ extension ArticleEntity {
                  url: "",
                  imageURL: imageurl,
                  newsSite: newssite ?? "",
-                 summary: summary ?? "",
+                 summary: summary ?? ""
         )
     }
 }
 
 protocol DataManagerProtocol {
     func saveArticleList(_ articles: [Article]) async throws
+    func saveOrUpdateArticle(_ articles: [Article]) async throws
     func fetchArticlesFromCoreData() async throws -> [Article]
     func fetchArticleDetailById(id: Int) async throws -> Article?
 }
@@ -81,6 +82,26 @@ final class DataManager: DataManagerProtocol {
             
             return try self.mainContext.fetch(articleRequest).first?.articleEntity()
         }
-        
+    }
+    
+    func saveOrUpdateArticle(_ articles: [Article]) async throws {
+        try await backgroundContext.perform {
+            for article in articles {
+                let request = ArticleEntity.fetchRequest()
+                request.predicate = NSPredicate(format: "id == %d", article.id)
+                
+                let existing = try self.backgroundContext.fetch(request).first
+                let entity = existing ?? ArticleEntity(context: self.backgroundContext)
+            
+                entity.id = Int64(article.id)
+                entity.title = article.title
+                entity.imageurl = article.imageURL
+                entity.newssite = article.newsSite
+                entity.summary = article.summary
+            }
+            if self.backgroundContext.hasChanges {
+                try self.backgroundContext.save()
+            }
+        }
     }
 }

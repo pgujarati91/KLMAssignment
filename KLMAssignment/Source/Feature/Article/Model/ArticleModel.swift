@@ -22,7 +22,7 @@ struct Article: Codable, Identifiable, Hashable {
         case summary
     }
     
-//    static func == (lhs: Article, rhs: Article) -> Bool {
-//        lhs.id == rhs.id
-//    }
+    static func == (lhs: Article, rhs: Article) -> Bool {
+        lhs.id == rhs.id
+    }
 }

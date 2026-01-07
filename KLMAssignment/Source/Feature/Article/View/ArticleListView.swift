@@ -10,7 +10,7 @@ struct ArticleListView: View {
             } placeholder: {
                 Rectangle().foregroundColor(.gray)
             }
-            .frame(width: 100, height: 150)
+            .frame(width: 80, height: 100)
             .clipShape(RoundedRectangle(cornerRadius: 20))
             .accessibilityIdentifier("showArticleImage")
             
@@ -21,10 +21,12 @@ struct ArticleListView: View {
                     .accessibilityIdentifier("articleTitle")
             }
             Spacer()
+            Image(systemName: "chevron.right")
         }
         .padding()
         .background(Color(.systemBackground))
         .clipShape(RoundedRectangle(cornerRadius: 12))
         .shadow(radius: 2)
+        .listRowBackground(Color.clear)
     }
 }

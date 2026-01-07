@@ -5,7 +5,7 @@ struct ArticleDetailView: View {
     
     @StateObject private var articleDetailViewModel = ArticleDetailViewModel()
     
-    let id: Int
+    private let id: Int
     
     init(id: Int) {
         self.id = id
@@ -19,8 +19,6 @@ struct ArticleDetailView: View {
             } else if let articleDetail = articleDetailViewModel.articleDetail {
                 
                 detailContent(articleDetail)
-                    .navigationTitle(articleDetail.title ?? "")
-                    .navigationBarTitleDisplayMode(.large)
                 
             } else {
                 ErrorView(
@@ -89,5 +87,7 @@ struct ArticleDetailView: View {
             .padding(.bottom, 16)
         }
         .navigationBarTitleDisplayMode(.inline)
+        .navigationTitle(articleDetail.title ?? "")
+        .navigationBarTitleDisplayMode(.large)
     }
 }

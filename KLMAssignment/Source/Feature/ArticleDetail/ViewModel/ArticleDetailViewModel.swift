@@ -12,20 +12,7 @@ final class ArticleDetailViewModel: ObservableObject {
     init(service: ArticleDetailServiceProtocol = ArticleDetailService()) {
         self.service = service
     }
-    
-    func getArticleById(by id: Int) async  {
-        isLoading = true
-        do {
-            let articleDetail = try await service.fetchArticleDetail(id: id)
-            self.articleDetail = articleDetail
-        }catch let networkError as NetworkError {
-            error = networkError
-        } catch {
-            self.error = .networkFailure(error)
-        }
-        isLoading = false
-    }
-    
+
     func getArticleByIdFromDataManager(by id: Int) async  {
         do {
             let articleDetail = try await service.fetchArticleDetailFromDataManager(id: id)
@@ -35,3 +22,4 @@ final class ArticleDetailViewModel: ObservableObject {
         }
     }
 }
+    

@@ -6,11 +6,11 @@ protocol ArticleServiceProtocol {
 
 final class ArticleService: ArticleServiceProtocol {
     private let client: APIClient
-    private let persistenceManager: DataManagerProtocol
+    private let dataManager: DataManagerProtocol
     
-    init(client: APIClient = DefaultAPIClient(), persistenceManager: DataManagerProtocol = DataManager.shared) {
+    init(client: APIClient = DefaultAPIClient(), dataManager: DataManagerProtocol = DataManager.shared) {
         self.client = client
-        self.persistenceManager = persistenceManager
+        self.dataManager = dataManager
     }
     
     func fetchArticles() async throws -> [Article] {
@@ -19,13 +19,12 @@ final class ArticleService: ArticleServiceProtocol {
             
             let articleResponse : ArticleModel =  try await client.send(endPoint, decoder: JSONDecoder())
             
-            try await persistenceManager.saveArticleList(articleResponse.results)
+            try await dataManager.saveOrUpdateArticle(articleResponse.results)
             
             return articleResponse.results
+            
         }catch {
-            return try await persistenceManager.fetchArticlesFromCoreData()
+            return try await dataManager.fetchArticlesFromCoreData()
         }
     }
-    
-    
 }

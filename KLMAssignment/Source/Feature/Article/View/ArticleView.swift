@@ -6,8 +6,10 @@ struct ArticleView: View {
 
     var body: some View {
         NavigationStack {
-            content
-                .navigationTitle("Articles")
+            Group {
+                content
+            }
+            .navigationTitle("Articles")
         }
         .task {
             await viewModel.getAllArticles()
@@ -16,29 +18,30 @@ struct ArticleView: View {
     
     @ViewBuilder
     private var content: some View {
-        if viewModel.isLoading && viewModel.article.isEmpty {
+        switch viewModel.loadingState {
+        case .idle:
+            Color.clear
+        case .loading:
             LoadingView()
                 .accessibilityIdentifier("loader")
-            
-        } else if viewModel.article.isEmpty {
-            ErrorView (message: "No Article Found")
-        }
-        else {
-            List(viewModel.article) { article in
-                
+        case .loaded(let articles):
+            List(articles) { article in
                 NavigationLink(value: article) {
                     ArticleListView(article: article)
                         .accessibilityIdentifier("articleList")
                 }
-                
                 .buttonStyle(.plain)
                 .listRowSeparator(.hidden)
                 .navigationLinkIndicatorVisibility(.hidden)
+                .scrollContentBackground(.hidden)
             }
-            .accessibilityIdentifier("articleList")
             .navigationDestination(for: Article.self) { article in
                 ArticleDetailView(id: article.id)
             }
+        case .empty:
+            ErrorView (message: "No Article Found")
+        case .error(let error):
+            ErrorView (message: "Errror Found \(error.localizedDescription)")
         }
     }
 }

@@ -2,11 +2,19 @@ import Foundation
 import SwiftUI
 internal import Combine
 
+enum LoadingState: Equatable {
+    case idle
+    case loading
+    case loaded([Article])
+    case error(NetworkError)
+    case empty
+}
+
 @MainActor
 final class ArticleViewModel: ObservableObject {
     
     private let articleService: ArticleServiceProtocol
-    @Published var isLoading = false
+    @Published private(set) var loadingState: LoadingState = .idle
     @Published var error: NetworkError?
     @Published var article: [Article] = []
     
@@ -15,15 +23,17 @@ final class ArticleViewModel: ObservableObject {
     }
     
     func getAllArticles() async {
-        isLoading = true
+        loadingState = .loading
         do {
-            let article = try await articleService.fetchArticles()
-            self.article = article
-            self.error = nil    
-        }catch let error {
-            self.error = error as? NetworkError
-            self.article = []
+            let articles = try await articleService.fetchArticles()
+            
+            loadingState = articles.isEmpty ? .empty : .loaded(articles)
+            
+            self.article = articles
+            
+        } catch {
+            let networkError = error as? NetworkError ?? .noData
+            loadingState = .error(networkError)
         }
-        isLoading = false
     }
 }
